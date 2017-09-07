@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/MainLinear"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="#847c7c"
+              android:orientation="vertical"
+              android:layout_marginStart="10dp"
+              android:layout_marginEnd="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="#fc0101"/>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:text="Номер телефона звонящего"
+                android:textColor="#000000"
+                android:textSize="20dp"/>
+
+            <TextView
+                android:id="@+id/textViewNumber"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:text="XXX"
+                android:textColor="#000000"
+                android:textSize="22dp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <SeekBar
+        android:layout_margin="6dp"
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:progress="1"
+        android:max="61"/>
+
+    <TextView
+        android:layout_margin="6dp"
+        android:text="60min"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        tools:text="60"/>
+
+    <LinearLayout
+        android:layout_margin="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textViewCancelWindowAfterCall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Закрыть"/>
+
+        <TextView
+            android:id="@+id/textViewOnlyIgnoreWindowAfterCall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Ignore"/>
+
+        <TextView
+            android:id="@+id/textViewIgnoreAndSendSMSWindowAfterCall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="SMS"/>
+
+    </LinearLayout>
+
+</LinearLayout>
