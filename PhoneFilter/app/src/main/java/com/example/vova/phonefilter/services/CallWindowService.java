@@ -12,15 +12,29 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.vova.phonefilter.R;
 
-public class CallWindowService extends Service {
+public class CallWindowService extends Service implements SeekBar.OnSeekBarChangeListener,
+        View.OnClickListener {
 
     private static WindowManager windowManager;
-    private static ViewGroup windowLayout;
+    private ViewGroup windowLayout;
+    private TextView mTextViewName, mTextViewNumber, mTextViewCurrencyTimer,
+            mTextCancel, mTextIgnore, mTextViewIgnoreAndSMS;
+    private SeekBar mSeekBarduwnTimer;
+
+    private int mMinutesTime;
+
+    public int getMinutesTime() {
+        return mMinutesTime;
+    }
+
+    public void setMinutesTime(int minutesTime) {
+        mMinutesTime = minutesTime;
+    }
 
     @Nullable
     @Override
@@ -29,7 +43,14 @@ public class CallWindowService extends Service {
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d("vDev", "CallWindowService  onStartCommand");
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
     public void onCreate() {
+        Log.d("vDev", "CallWindowService  onCreate");
         super.onCreate();
 
         showWindow(this);
@@ -37,8 +58,17 @@ public class CallWindowService extends Service {
 
     @Override
     public void onDestroy() {
-        closeWindow();
+        Log.d("vDev", "CallWindowService  onDestroy");
+
+//        closeWindow();
         super.onDestroy();
+    }
+
+    @Override
+    public boolean stopService(Intent name) {
+        Log.d("vDev", "CallWindowService  stopService");
+
+        return super.stopService(name);
     }
 
     private void showWindow(Context context) {
@@ -55,24 +85,82 @@ public class CallWindowService extends Service {
 
         windowLayout = (ViewGroup) layoutInflater.inflate(R.layout.window_after_call, null);
 
-        TextView textViewNumber = (TextView) windowLayout.findViewById(R.id.textViewNumber);
-        TextView textViewClose = (TextView) windowLayout.findViewById(R.id.textViewCancelWindowAfterCall);
-        textViewNumber.setText("Some number...");
-        textViewClose.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("My", "CallReceiver  onClick(View v");
-                closeWindow();
-            }
-        });
+        workWithViews();
 
         windowManager.addView(windowLayout, params);
     }
 
+    private void workWithViews() {
+        //find views
+        mTextViewName = (TextView) windowLayout.findViewById(R.id.textViewContactNameWindowAfterCall);
+        mTextViewNumber = (TextView) windowLayout.findViewById(R.id.textViewContactNumberWindowAfterCall);
+        mTextViewCurrencyTimer = (TextView) windowLayout.findViewById(R.id.textViewTimerCurrencyTextWindowAfterCall);
+        mTextCancel = (TextView) windowLayout.findViewById(R.id.textViewCancelTextWindowAfterCall);
+        mTextIgnore = (TextView) windowLayout.findViewById(R.id.textViewOnlyIgnoreTextWindowAfterCall);
+        mTextViewIgnoreAndSMS = (TextView) windowLayout.findViewById(R.id.textViewIgnoreAndSendSMSTextWindowAfterCall);
+        mSeekBarduwnTimer = (SeekBar) windowLayout.findViewById(R.id.seekBarMinutesDownTimerWindowAfterCall);
+
+        mSeekBarduwnTimer.setOnSeekBarChangeListener(this);
+        mTextCancel.setOnClickListener(this);
+        mTextIgnore.setOnClickListener(this);
+        mTextViewIgnoreAndSMS.setOnClickListener(this);
+    }
+
     private void closeWindow() {
-        if (windowLayout !=null){
+        if (windowLayout != null) {
             windowManager.removeView(windowLayout);
-            windowLayout =null;
+            windowLayout = null;
+        }
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        Log.d("vDev", "CallWindowService  setOnSeekBarChangeListener onProgressChanged -> " + seekBar.getProgress());
+        mTextViewCurrencyTimer.setText(String.valueOf(seekBar.getProgress()) + " min");
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        Log.d("vDev", "CallWindowService  setOnSeekBarChangeListener onStartTrackingTouch -> " + seekBar.getProgress());
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        Log.d("vDev", "CallWindowService  setOnSeekBarChangeListener onStopTrackingTouch -> " + seekBar.getProgress());
+        setMinutesTime(seekBar.getProgress());
+        mTextViewCurrencyTimer.setText(String.valueOf(seekBar.getProgress()) + " min");
+    }
+
+    @Override
+    public void onClick(View v) {
+        Intent blockCallServiceIntent;
+        switch (v.getId()) {
+            case R.id.textViewCancelTextWindowAfterCall:
+                Log.d("vDev", "CallWindowService  onClick(View v");
+                closeWindow();
+                stopSelf();
+                break;
+            case R.id.textViewOnlyIgnoreTextWindowAfterCall:
+                Log.d("vDev", "CallWindowService  textViewOnlyIgnoreTextWindowAfterCall -> " );
+                if (!(getMinutesTime() == 0)) {
+                    blockCallServiceIntent = new Intent(this, BlockCallService.class);
+                    blockCallServiceIntent.putExtra(BlockCallService.KEY_MINUTES_TIMER, getMinutesTime());
+                    getApplicationContext().startService(blockCallServiceIntent);
+                }
+//                getApplicationContext().startService(new Intent(this, BlockCallService.class));
+                closeWindow();
+                stopSelf();
+                break;
+            case R.id.textViewIgnoreAndSendSMSTextWindowAfterCall:
+                Log.d("vDev", "CallWindowService  textViewIgnoreAndSendSMSTextWindowAfterCall -> ");
+                closeWindow();
+                stopSelf();
+                break;
+            default:
+                closeWindow();
+                stopSelf();
+                break;
         }
     }
 }

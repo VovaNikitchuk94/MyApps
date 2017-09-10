@@ -33,6 +33,7 @@
         </receiver>
 
         <service android:name=".services.CallWindowService"/>
+        <service android:name=".services.BlockCallService"/>
 
         <meta-data
             android:name="io.fabric.ApiKey"

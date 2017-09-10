@@ -4,59 +4,71 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.android.internal.telephony.ITelephony;
+import com.example.vova.phonefilter.model.Subscriber;
+import com.example.vova.phonefilter.model.SubscriberDBWrapper;
 import com.example.vova.phonefilter.services.CallWindowService;
 
 import java.lang.reflect.Method;
 
 public class CallReceiver extends BroadcastReceiver {
 
-    public static final String MY_NUMBER = "+380993183634";
-
     private static boolean mIncomingCall = false;
-    private static String mIncomingNumber = "";
+    private String mIncomingNumber = "";
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.d("vDev", " CallReceiver onReceive");
 
         if (intent.getAction().equals("android.intent.action.PHONE_STATE")) {
 
             String phoneState = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
-            //
+
             if (phoneState.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
+                Log.d("vDev", "CallReceiver EXTRA_STATE_RINGING");
+
                 mIncomingCall = true;
                 mIncomingNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER);
 
-//                Log.d("My", "CallReceiver  RINGING");
-//                showWindow(context, mIncomingNumber);
+                SubscriberDBWrapper subscriberDBWrapper = new SubscriberDBWrapper(context);
+                Subscriber subscriber = subscriberDBWrapper.getSubscriberByNumber(mIncomingNumber);
+                if (subscriber == null) {
+                    Log.d("vDev", "CallReceiver subscriber == null");
+                } else {
+                    Log.d("vDev", "CallReceiver subscriber -> " + subscriber.getSubscriberNumber() + "\n +" + subscriber.getId());
+                }
 
-
-//                if (mIncomingNumber.equals(MY_NUMBER)) {
-//                    Log.d("My", "CallReceiver mIncomingNumber.equals(MY_NUMBER) -> " + mIncomingNumber.equals(MY_NUMBER));
-//                    disconnectPhoneItelephony(context);
+//                for (Subscriber subscriber: subscriberDBWrapper.getAllSubscribers()) {
+//                if (subscriberDBWrapper.getSubscriberByNumber(mIncomingNumber) != null) {
+//                    Log.d("vDev", "CallReceiver subscriber.getSubscriberNumber() -> " + subscriberDBWrapper.getSubscriberByNumber(mIncomingNumber).getSubscriberNumber());
+//
 //                }
-
-                context.startService(new Intent(context, CallWindowService.class));
-
+//                    if (subscriber.getSubscriberNumber().equals(mIncomingNumber)) {
+//                        disconnectPhoneItelephony(context);
+//                    }
+//                }
             } else if (phoneState.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
 
                 if (mIncomingCall) {
-//                    closeWindow();
-//                    Log.d("My", "CallReceiver  OFFHOOK");
+                    Log.d("vDev", "CallReceiver  OFFHOOK");
                     mIncomingCall = false;
                 }
             } else if (phoneState.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
 
                 if (mIncomingCall) {
-//                    closeWindow();
-//                    Log.d("My", "CallReceiver  IDLE");
+                    context.startService(new Intent(context, CallWindowService.class));
+                    Log.d("vDev", "CallReceiver  IDLE true");
                     mIncomingCall = false;
+                } else {
+                    Log.d("vDev", "CallReceiver  IDLE false");
                 }
             }
         }
     }
 
+    //some magic
     private void disconnectPhoneItelephony(Context context)
     {
         ITelephony telephonyService;

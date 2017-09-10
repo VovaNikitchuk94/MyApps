@@ -18,6 +18,11 @@ public class Subscriber extends BaseEntity{
         mIsBlackListAdded = isBlackListAdded;
     }
 
+    public Subscriber(String subscriberNumber, int isBlackListAdded) {
+        mSubscriberNumber = subscriberNumber;
+        mIsBlackListAdded = isBlackListAdded;
+    }
+
     public Subscriber(Cursor cursor) {
         setId(cursor.getLong(cursor.getColumnIndex(SubscriberTable.Cols.SUBSCRIBER_INFO_FIELD_ID)));
         mSubscriberName = cursor.getString(cursor.getColumnIndex(SubscriberTable.Cols.SUBSCRIBER_INFO_FIELD_NAME));
