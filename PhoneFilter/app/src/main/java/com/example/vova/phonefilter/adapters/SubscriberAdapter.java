@@ -46,6 +46,8 @@ public class SubscriberAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 //        subscriberViewHolder.imageViewContact.setImageResource(R.drawable.test);
         if (subscriber.getSubscriberName() != null) {
             subscriberViewHolder.textViewName.setText(subscriber.getSubscriberName());
+        } else {
+            subscriberViewHolder.textViewName.setText(R.string.textUnknownName);
         }
         subscriberViewHolder.textViewNumber.setText(subscriber.getSubscriberNumber());
         subscriberViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -74,7 +76,7 @@ public class SubscriberAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
         public SubscriberViewHolder(View itemView) {
             super(itemView);
-            imageViewContact = (ImageView) itemView.findViewById(R.id.imageViewContactImageSubscriberItem);
+            imageViewContact = (ImageView) itemView.findViewById(R.id.imageViewSubscriberImageSubscriberItem);
             textViewName = (TextView) itemView.findViewById(R.id.textViewSubscriberNameSubscriberItem);
             textViewNumber = (TextView) itemView.findViewById(R.id.textViewSubscriberNumberSubscriberItem);
 //            itemView.setOnClickListener(this);

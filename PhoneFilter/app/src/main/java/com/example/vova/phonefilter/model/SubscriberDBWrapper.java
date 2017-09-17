@@ -2,7 +2,6 @@ package com.example.vova.phonefilter.model;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -47,6 +46,15 @@ public class SubscriberDBWrapper {
         database.close();
     }
 
+    public void updateSubscriber (Subscriber subscriber) {
+        SQLiteDatabase database = getWritable();
+        String strRequest = SubscriberTable.Cols.SUBSCRIBER_INFO_FIELD_ID + "=?";
+        String arrArgs[] = new String[]{Long.toString(subscriber.getId())};
+        database.update(getStrTableName(), subscriber.getContentValues(), strRequest, arrArgs);
+        database.close();
+
+    }
+
     public Subscriber getSubscriberByNumber(String number) {
         Subscriber subscriber = null;
         SQLiteDatabase database = getReadable();
@@ -57,8 +65,6 @@ public class SubscriberDBWrapper {
             if (cursor != null && cursor.moveToNext()) {
                 subscriber = new Subscriber(cursor);
             }
-        } catch (CursorIndexOutOfBoundsException e) {
-            e.printStackTrace();
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -66,6 +72,47 @@ public class SubscriberDBWrapper {
             database.close();
         }
         return subscriber;
+    }
+    public Subscriber getSubscriberById(long nId) {
+        Subscriber subscriber = null;
+        SQLiteDatabase database = getReadable();
+        String whereClause = SubscriberTable.Cols.SUBSCRIBER_INFO_FIELD_ID + "=?";
+        String[] whereArgs = new String[] {Long.toString(nId)};
+        Cursor cursor = database.query(getStrTableName(), null, whereClause, whereArgs, null, null, null);
+        try {
+            if (cursor != null && cursor.moveToNext()) {
+                subscriber = new Subscriber(cursor);
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            database.close();
+        }
+        return subscriber;
+    }
+
+
+    public ArrayList<Subscriber> getAllBlockedSubscribers(int nBlock) {
+        ArrayList<Subscriber> subscribers = new ArrayList<>();
+        SQLiteDatabase database = getReadable();
+        String whereClause = SubscriberTable.Cols.SUBSCRIBER_INFO_FIELD_BLACKLIST + "=?";
+        String[] whereArgs = new String[] {Integer.toString(nBlock)};
+        Cursor cursor = database.query(getStrTableName(), null, whereClause, whereArgs, null, null, null);
+        try {
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    Subscriber subscriber = new Subscriber(cursor);
+                    subscribers.add(subscriber);
+                } while (cursor.moveToNext());
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            database.close();
+        }
+        return subscribers;
     }
 
     public ArrayList<Subscriber> getAllSubscribers() {

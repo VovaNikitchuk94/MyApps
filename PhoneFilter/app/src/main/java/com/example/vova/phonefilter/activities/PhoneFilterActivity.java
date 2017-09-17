@@ -1,8 +1,12 @@
 package com.example.vova.phonefilter.activities;
 
+import android.content.ContentResolver;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.CountDownTimer;
+import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -25,16 +29,12 @@ import com.example.vova.phonefilter.adapters.SubscriberAdapter;
 import com.example.vova.phonefilter.model.Subscriber;
 import com.example.vova.phonefilter.model.SubscriberDBWrapper;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import io.fabric.sdk.android.Fabric;
 
-public class PhoneFilterActivity extends AppCompatActivity implements SubscriberAdapter.OnClickSubscriberItem{
+public class PhoneFilterActivity extends AppCompatActivity implements SubscriberAdapter.OnClickSubscriberItem,
+        View.OnClickListener {
 
     private RecyclerView mRecyclerViewBlackList;
     private TextView mTextViewEmptyListInfo;
@@ -46,14 +46,15 @@ public class PhoneFilterActivity extends AppCompatActivity implements Subscriber
 
 //    private CountDownTimer mCountDownTimer;
 //    private TextView mTextView1;
-//    private Button mButton1;
+    private Button mButton1;
 //    private Button mButton2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        Fabric.with(this, new Crashlytics());
-        Fabric.with(this, new Crashlytics.Builder().core(new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build()).build());
+        Fabric.with(this, new Crashlytics.Builder()
+                .core(new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build()).build());
         setContentView(R.layout.activity_phone_filter);
 
         mTextViewEmptyListInfo = (TextView) findViewById(R.id.textViewInfoActivityPhoneFilter);
@@ -67,7 +68,7 @@ public class PhoneFilterActivity extends AppCompatActivity implements Subscriber
             }
         });
 
-        mRecyclerViewBlackList = (RecyclerView) findViewById(R.id.recyclerViewBlackListActivityPhoneFilter);
+        mRecyclerViewBlackList = (RecyclerView) findViewById(R.id.simpleRecyclerView);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRecyclerViewBlackList.setLayoutManager(layoutManager);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerViewBlackList.getContext(),
@@ -76,42 +77,14 @@ public class PhoneFilterActivity extends AppCompatActivity implements Subscriber
 
         getData();
 
-
-//        mButton1.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Log.d("vDev", "PhoneFilterActivity onCreate onClick mButton1 -> ");
-//
-//                mCountDownTimer = new CountDownTimer(30000, 1000) {
-//
-//                    public void onTick(long millisUntilFinished) {
-//                        mTextView1.setText("seconds remaining: " + millisUntilFinished / 1000);
-//                    }
-//
-//                    public void onFinish() {
-//                        mTextView1.setText("done!");
-//                    }
-//                }.start();
-//
-//            }
-//        });
-//
-//        mButton2 = (Button) findViewById(R.id.button2);
-//        mButton2.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Log.d("vDev", "PhoneFilterActivity onCreate onClick mButton2 -> ");
-//
-//                mCountDownTimer.cancel();
-//            }
-//        });
-
+        mButton1 = (Button) findViewById(R.id.button1);
+        mButton1.setOnClickListener(this);
     }
 
     private void getData() {
         mSubscribersList.clear();
         SubscriberDBWrapper subscriberDBWrapper = new SubscriberDBWrapper(getApplicationContext());
-        mSubscribersList = subscriberDBWrapper.getAllSubscribers();
+        mSubscribersList = subscriberDBWrapper.getAllBlockedSubscribers(1);
         if (mSubscribersList.isEmpty()) {
             mTextViewEmptyListInfo.setVisibility(View.VISIBLE);
             mRecyclerViewBlackList.setVisibility(View.GONE);
@@ -127,7 +100,6 @@ public class PhoneFilterActivity extends AppCompatActivity implements Subscriber
     }
 
     private void openDialogInputNumber() {
-
         LayoutInflater layoutInflater = LayoutInflater.from(PhoneFilterActivity.this);
         View subView = layoutInflater.inflate(R.layout.dialog_input_number, null);
         final EditText subEditText = (EditText) subView.findViewById(R.id.editTextInputNumberActivityPhoneFilter);
@@ -143,9 +115,7 @@ public class PhoneFilterActivity extends AppCompatActivity implements Subscriber
                         String inputNumber = subEditText.getText().toString();
                         SubscriberDBWrapper subscriberDBWrapper = new SubscriberDBWrapper(PhoneFilterActivity.this);
                         subscriberDBWrapper.addToBlackList(new Subscriber(inputNumber, 1));
-
                         updateList();
-//                        Toast.makeText(PhoneFilterActivity.this, inputNumber, Toast.LENGTH_SHORT).show();
                         Log.d("vDev", "PhoneFilterActivity onCreate onClick PositiveButton text -> " + inputNumber);
                     }
                 })
@@ -163,7 +133,7 @@ public class PhoneFilterActivity extends AppCompatActivity implements Subscriber
     private void updateList() {
         mSubscribersList.clear();
         SubscriberDBWrapper dbWrapper = new SubscriberDBWrapper(PhoneFilterActivity.this);
-        mSubscribersList.addAll(dbWrapper.getAllSubscribers());
+        mSubscribersList.addAll(dbWrapper.getAllBlockedSubscribers(1));
         if (!mSubscribersList.isEmpty()) {
             mTextViewEmptyListInfo.setVisibility(View.GONE);
             mRecyclerViewBlackList.setVisibility(View.VISIBLE);
@@ -177,4 +147,16 @@ public class PhoneFilterActivity extends AppCompatActivity implements Subscriber
     public void onClickSubscriberItem(Subscriber mSubscriber) {
         Log.d("vDev", "PhoneFilterActivity onClickSubscriberItem 3 -> ");
     }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.button1:
+                Intent intent = new Intent(this, ContactsActivity.class);
+                startActivity(intent);
+                break;
+        }
+    }
+
+
 }

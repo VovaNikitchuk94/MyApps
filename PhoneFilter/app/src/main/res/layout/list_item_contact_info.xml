@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp">
+
+    <ImageView
+        android:id="@+id/imageViewContactImageContactItem"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentLeft="true"
+        android:background="#a7ffeb"/>
+
+    <TextView
+        android:gravity="center"
+        android:background="#607d8b"
+        tools:text="+3"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:id="@+id/textViewShortContactNumberContactItem"/>
+
+    <LinearLayout
+        android:id="@+id/linealLayoutContactItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/imageViewContactImageContactItem"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textViewContactNameContactItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="8dp"
+            tools:text="Name"/>
+
+        <TextView
+            android:id="@+id/textViewContactNumberContactItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="8dp"
+            tools:text="Number"/>
+
+    </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/checkboxContactAddContactItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerInParent="true"
+        android:paddingStart="16dp"
+        tools:checked="true"/>
+
+</RelativeLayout>

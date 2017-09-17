@@ -10,6 +10,7 @@ public class DBConstans {
 
         public static final class Cols {
             public static final String SUBSCRIBER_INFO_FIELD_ID = "_id";
+            public static final String SUBSCRIBER_INFO_FIELD_PHOTO_URI = "_photo_uri";
             public static final String SUBSCRIBER_INFO_FIELD_NAME = "_name";
             public static final String SUBSCRIBER_INFO_FIELD_NUMBER = "_number";
             public static final String SUBSCRIBER_INFO_FIELD_BLACKLIST = "_blacklist";

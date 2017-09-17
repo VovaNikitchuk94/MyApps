@@ -16,6 +16,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.vova.phonefilter.R;
+import com.example.vova.phonefilter.model.Subscriber;
+import com.example.vova.phonefilter.model.SubscriberDBWrapper;
 
 public class CallWindowService extends Service implements SeekBar.OnSeekBarChangeListener,
         View.OnClickListener {
@@ -27,6 +29,11 @@ public class CallWindowService extends Service implements SeekBar.OnSeekBarChang
     private SeekBar mSeekBarduwnTimer;
 
     private int mMinutesTime;
+    private String mSubNumber = null;
+    private String mSubName = null;
+    private Subscriber mSubscriber = null;
+
+    public static final String KEY_NUMBER_SUBSCRIBER_CALL_WINDOW = "KEY_NUMBER_SUBSCRIBER_CALL_WINDOW";
 
     public int getMinutesTime() {
         return mMinutesTime;
@@ -45,6 +52,12 @@ public class CallWindowService extends Service implements SeekBar.OnSeekBarChang
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("vDev", "CallWindowService  onStartCommand");
+        mSubNumber = intent.getStringExtra(KEY_NUMBER_SUBSCRIBER_CALL_WINDOW);
+        Log.d("vDev", "CallWindowService  onStartCommand mSubNumber -> " + mSubNumber);
+
+        getSubInfo();
+//        showWindow(this);
+        initViews();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -52,22 +65,18 @@ public class CallWindowService extends Service implements SeekBar.OnSeekBarChang
     public void onCreate() {
         Log.d("vDev", "CallWindowService  onCreate");
         super.onCreate();
-
         showWindow(this);
     }
 
     @Override
     public void onDestroy() {
         Log.d("vDev", "CallWindowService  onDestroy");
-
-//        closeWindow();
         super.onDestroy();
     }
 
     @Override
     public boolean stopService(Intent name) {
         Log.d("vDev", "CallWindowService  stopService");
-
         return super.stopService(name);
     }
 
@@ -84,13 +93,10 @@ public class CallWindowService extends Service implements SeekBar.OnSeekBarChang
         params.gravity = Gravity.TOP;
 
         windowLayout = (ViewGroup) layoutInflater.inflate(R.layout.window_after_call, null);
-
-        workWithViews();
-
         windowManager.addView(windowLayout, params);
     }
 
-    private void workWithViews() {
+    private void initViews() {
         //find views
         mTextViewName = (TextView) windowLayout.findViewById(R.id.textViewContactNameWindowAfterCall);
         mTextViewNumber = (TextView) windowLayout.findViewById(R.id.textViewContactNumberWindowAfterCall);
@@ -99,6 +105,15 @@ public class CallWindowService extends Service implements SeekBar.OnSeekBarChang
         mTextIgnore = (TextView) windowLayout.findViewById(R.id.textViewOnlyIgnoreTextWindowAfterCall);
         mTextViewIgnoreAndSMS = (TextView) windowLayout.findViewById(R.id.textViewIgnoreAndSendSMSTextWindowAfterCall);
         mSeekBarduwnTimer = (SeekBar) windowLayout.findViewById(R.id.seekBarMinutesDownTimerWindowAfterCall);
+
+        if (mSubName != null) {
+            mTextViewName.setText(mSubName);
+        } else {
+            mTextViewName.setText("Unknown subscriber");
+        }
+        mTextViewNumber.setText(mSubNumber);
+        Log.d("vDev", "CallWindowService  mSubName -> " + mSubName);
+        Log.d("vDev", "CallWindowService  subNumber -> " + mSubNumber);
 
         mSeekBarduwnTimer.setOnSeekBarChangeListener(this);
         mTextCancel.setOnClickListener(this);
@@ -110,6 +125,17 @@ public class CallWindowService extends Service implements SeekBar.OnSeekBarChang
         if (windowLayout != null) {
             windowManager.removeView(windowLayout);
             windowLayout = null;
+        }
+    }
+
+    private void getSubInfo() {
+        SubscriberDBWrapper subscriberDBWrapper = new SubscriberDBWrapper(getApplicationContext());
+        if (mSubNumber != null) {
+            mSubscriber = subscriberDBWrapper.getSubscriberByNumber(mSubNumber);
+        }
+        if (mSubscriber != null) {
+            mSubName = mSubscriber.getSubscriberName();
+            mSubNumber = mSubscriber.getSubscriberNumber();
         }
     }
 
@@ -135,6 +161,12 @@ public class CallWindowService extends Service implements SeekBar.OnSeekBarChang
     @Override
     public void onClick(View v) {
         Intent blockCallServiceIntent;
+        SubscriberDBWrapper subscriberDBWrapper = new SubscriberDBWrapper(getApplicationContext());
+        Subscriber subscriber = null;
+        if (mSubNumber != null) {
+            subscriber = subscriberDBWrapper.getSubscriberByNumber(mSubNumber);
+            subscriber.setIsBlackListAdded(1);
+        }
         switch (v.getId()) {
             case R.id.textViewCancelTextWindowAfterCall:
                 Log.d("vDev", "CallWindowService  onClick(View v");
@@ -143,12 +175,15 @@ public class CallWindowService extends Service implements SeekBar.OnSeekBarChang
                 break;
             case R.id.textViewOnlyIgnoreTextWindowAfterCall:
                 Log.d("vDev", "CallWindowService  textViewOnlyIgnoreTextWindowAfterCall -> " );
-                if (!(getMinutesTime() == 0)) {
+                if (!(getMinutesTime() == 0) && subscriber != null) {
+                    subscriberDBWrapper.updateSubscriber(subscriber);
                     blockCallServiceIntent = new Intent(this, BlockCallService.class);
-                    blockCallServiceIntent.putExtra(BlockCallService.KEY_MINUTES_TIMER, getMinutesTime());
+                    blockCallServiceIntent.putExtra(BlockCallService.KEY_ID_SUBSCRIBER_BLOCK_CALL,
+                            subscriber.getId());
+                    blockCallServiceIntent.putExtra(BlockCallService.KEY_MINUTES_TIMER_BLOCK_CALL,
+                            getMinutesTime());
                     getApplicationContext().startService(blockCallServiceIntent);
                 }
-//                getApplicationContext().startService(new Intent(this, BlockCallService.class));
                 closeWindow();
                 stopSelf();
                 break;

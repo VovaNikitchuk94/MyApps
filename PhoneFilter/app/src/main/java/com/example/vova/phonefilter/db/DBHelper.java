@@ -18,6 +18,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         sqLiteDatabase.execSQL("CREATE TABLE " + SubscriberTable.TABLE_NAME
                 + " (" + SubscriberTable.Cols.SUBSCRIBER_INFO_FIELD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + SubscriberTable.Cols.SUBSCRIBER_INFO_FIELD_PHOTO_URI + " TEXT, "
                 + SubscriberTable.Cols.SUBSCRIBER_INFO_FIELD_NAME + " TEXT, "
                 + SubscriberTable.Cols.SUBSCRIBER_INFO_FIELD_NUMBER + " TEXT NOT NULL, "
                 + SubscriberTable.Cols.SUBSCRIBER_INFO_FIELD_BLACKLIST + " INTEGER NOT NULL); ");

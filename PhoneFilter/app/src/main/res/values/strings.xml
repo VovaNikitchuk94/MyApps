@@ -3,4 +3,5 @@
     <string name="textResInputNumber">Input number</string>
     <string name="textHintNumber">Number</string>
     <string name="textOK">OK</string>
+    <string name="textUnknownName">Unknown</string>
 </resources>
